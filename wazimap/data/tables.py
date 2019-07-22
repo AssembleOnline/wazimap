@@ -207,14 +207,14 @@ class SimpleTable(object):
                     recode = {f: recode(f) for f in fields}
 
             # is the total column valid?
-            if isinstance(total, basestring) and total not in self.columns:
+            if isinstance(total, str) and total not in self.columns:
                 raise ValueError("Total column '%s' isn't one of the columns for table '%s'. Valid columns are: %s" % (
                     total, self.id, ', '.join(self.columns.keys())))
 
             # table columns to fetch
             cols = [self.model.__table__.columns[c] for c in fields]
 
-            if total is not None and isinstance(total, basestring) and total not in cols:
+            if total is not None and isinstance(total, str) and total not in cols:
                 cols.append(total)
 
             # do the query. If this returns no data, row is None
@@ -232,7 +232,7 @@ class SimpleTable(object):
             if total is None:
                 # sum of all columns
                 total = sum(getattr(row, f) or 0 for f in fields)
-            elif isinstance(total, basestring):
+            elif isinstance(total, str):
                 total = getattr(row, total)
 
             # Now build a data dictionary based on the columns in +row+.
