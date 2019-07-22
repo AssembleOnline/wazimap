@@ -196,9 +196,9 @@ class SimpleTable(object):
                         raise ValueError("Invalid field/column '%s' for table '%s'. Valid columns are: %s" % (
                             f, self.id, ', '.join(self.columns.keys())))
             else:
-                fields = list(self.columns)
+                fields = self.columns.keys()
                 if self.total_column:
-                    fields.remove(self.total_column)
+                    del fields[self.total_column]
 
             recode = recode or {}
             if recode:
