@@ -1,7 +1,7 @@
 from __future__ import division
 from collections import OrderedDict
 
-from sqlalchemy import create_engine, MetaData, func
+from sqlalchemy import create_engine, MetaData, func, desc
 from sqlalchemy.orm import sessionmaker, class_mapper
 
 from django.conf import settings
@@ -298,13 +298,15 @@ def get_objects_by_geo(db_model, geo, session, fields=None, order_by=None,
             attr = attr[1:]
 
         if attr == 'total':
-            if is_desc:
-                attr = attr + ' DESC'
+            pass
         else:
             attr = getattr(db_model, attr)
-            if is_desc:
-                attr = attr.desc()
-        objects = objects.order_by(attr)
+            
+        if is_desc:
+            objects = objects.order_by(desc(attr))
+        else:
+            objects = objects.order_by(attr)
+            
     objects = objects.all()
     if len(objects) == 0:
         raise LocationNotFound("%s for geography %s version '%s' not found"
