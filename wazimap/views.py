@@ -260,7 +260,7 @@ class DataAPIView(View):
         data = {}
 
         for table in tables:
-            for geo_id, table_data in table.raw_data_for_geos(geos).iteritems():
+            for geo_id, table_data in table.raw_data_for_geos(geos).items():
                 data.setdefault(geo_id, {})[table.id.upper()] = table_data
 
         return data

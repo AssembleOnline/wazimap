@@ -62,7 +62,7 @@ class DownloadManager(object):
             out_layer.CreateField(ogr.FieldDefn('name', ogr.OFTString))
 
             for table in tables:
-                for column_id, column_info in table.columns.iteritems():
+                for column_id, column_info in table.columns.items():
                     out_layer.CreateField(ogr.FieldDefn(str(column_id), ogr.OFTReal))
 
             for geo in geos:
@@ -83,7 +83,7 @@ class DownloadManager(object):
                 for table in tables:
                     table_estimates = data[geoid][table.id.upper()]['estimate']
 
-                    for column_id, column_info in table.columns.iteritems():
+                    for column_id, column_info in table.columns.items():
                         if column_id in table_estimates:
                             est = table_estimates[column_id]
                             # None values get changed to zero, which isn't accurate

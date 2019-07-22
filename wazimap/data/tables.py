@@ -156,7 +156,7 @@ class SimpleTable(object):
             for row in rows:
                 geo_values = data['%s-%s' % (row.geo_level, row.geo_code)]
 
-                for col in self.columns.iterkeys():
+                for col in self.columns.keys():
                     geo_values['estimate'][col] = getattr(row, col)
                     geo_values['error'][col] = 0
 
