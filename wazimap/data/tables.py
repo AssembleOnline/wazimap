@@ -198,7 +198,7 @@ class SimpleTable(object):
             else:
                 fields = self.columns.keys()
                 if self.total_column:
-                    del fields[self.total_column]
+                    fields.pop(self.total_column)
 
             recode = recode or {}
             if recode:
