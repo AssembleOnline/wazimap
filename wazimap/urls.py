@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
-from django.contrib import admin
-from django.core.urlresolvers import reverse_lazy
+# from django.contrib import admin
+from django.urls import reverse_lazy
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
 from django.views.generic.base import RedirectView, TemplateView
@@ -13,7 +13,7 @@ from wazimap.views import (HomepageView, GeographyDetailView, GeographyJsonView,
                            GeoAPIView, TableDetailView)
 
 
-admin.autodiscover()
+# admin.autodiscover()
 handler500 = 'census.views.server_error'
 
 STANDARD_CACHE_TIME = settings.WAZIMAP['cache_secs']
