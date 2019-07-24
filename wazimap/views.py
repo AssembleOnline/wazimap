@@ -271,7 +271,7 @@ class TableAPIView(View):
     View that lists data tables.
     """
     def get(self, request, *args, **kwargs):
-        return render_json_to_response([t.as_dict(columns=False) for t in DATA_TABLES.itervalues()])
+        return render_json_to_response([t.as_dict(columns=False) for t in DATA_TABLES.values()])
 
 
 class AboutView(TemplateView):
