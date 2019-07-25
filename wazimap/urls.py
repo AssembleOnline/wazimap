@@ -37,7 +37,7 @@ urlpatterns = [
     path("help", cache_page(STANDARD_CACHE_TIME)(HelpView.as_view()), name="help"),
     # e.g. /profiles/province-GT-gauteng/
     path(
-        "profiles/<geography_id>-<slug>/",
+        "profiles/<geo_level>/<geo_code>/<slug>/",
         cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()),
         name="geography_detail",
     ),
