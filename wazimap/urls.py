@@ -21,11 +21,11 @@ EMBED_CACHE_TIME = settings.WAZIMAP.get('embed_cache_secs', STANDARD_CACHE_TIME)
 
 
 urlpatterns = [
-    path('', cache_page(STANDARD_CACHE_TIME)(HomepageView.as_view())),
-    path('about', cache_page(STANDARD_CACHE_TIME)(AboutView.as_view())),
-    path('help', cache_page(STANDARD_CACHE_TIME)(HelpView.as_view())),
+    path('', cache_page(STANDARD_CACHE_TIME)(HomepageView.as_view()), name='homepage'),
+    path('about', cache_page(STANDARD_CACHE_TIME)(AboutView.as_view()), name='about'),
+    path('help', cache_page(STANDARD_CACHE_TIME)(HelpView.as_view()), name='help'),
     # e.g. /profiles/province-GT/
-    path('profiles/<geography_id>-<slug>/', cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view())),
+    path('profiles/<geography_id>-<slug>/', cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()), name = 'geography_detail'),
 
     # embeds - handles the legacy static/iframe.html URL to generate the page on the fly
     #          so that settings can be injected
