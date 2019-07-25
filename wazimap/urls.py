@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
 # from django.contrib import admin
-from django.urls import reverse_lazy, path
+from django.urls import reverse_lazy, path, re_path
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
 from django.views.generic.base import RedirectView, TemplateView
@@ -25,7 +25,7 @@ urlpatterns = [
     path('about', cache_page(STANDARD_CACHE_TIME)(AboutView.as_view()), name='about'),
     path('help', cache_page(STANDARD_CACHE_TIME)(HelpView.as_view()), name='help'),
     # e.g. /profiles/province-GT/
-    path('profiles/<geography_id>-<slug>/', cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()), name = 'geography_detail'),
+    re_path(r'^profiles/(?P<geography_id>\w+-\w+)(-(?P<slug>[\w-]+))?/$', cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()), name = 'geography_detail'),
 
     # embeds - handles the legacy static/iframe.html URL to generate the page on the fly
     #          so that settings can be injected
