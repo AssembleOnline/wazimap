@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls import url
 # from django.contrib import admin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, path
 from django.http import HttpResponse
 from django.views.decorators.cache import cache_page
 from django.views.generic.base import RedirectView, TemplateView
@@ -21,33 +21,11 @@ EMBED_CACHE_TIME = settings.WAZIMAP.get('embed_cache_secs', STANDARD_CACHE_TIME)
 
 
 urlpatterns = [
-    url(
-        regex   = '^$',
-        view    = cache_page(STANDARD_CACHE_TIME)(HomepageView.as_view()),
-        kwargs  = {},
-        name    = 'homepage',
-    ),
-
-    url(
-        regex   = '^about$',
-        view    = cache_page(STANDARD_CACHE_TIME)(AboutView.as_view()),
-        kwargs  = {},
-        name    = 'about',
-    ),
-    url(
-        regex   = '^help$',
-        view    = cache_page(STANDARD_CACHE_TIME)(HelpView.as_view()),
-        kwargs  = {},
-        name    = 'help',
-    ),
-
+    path('', cache_page(STANDARD_CACHE_TIME)(HomepageView.as_view())),
+    path('about', cache_page(STANDARD_CACHE_TIME)(AboutView.as_view())),
+    path('help', cache_page(STANDARD_CACHE_TIME)(HelpView.as_view())),
     # e.g. /profiles/province-GT/
-    url(
-        regex   = '^profiles/(?P<geography_id>\w+-\w+)(-(?P<slug>[\w-]+))?/$',
-        view    = cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()),
-        kwargs  = {},
-        name    = 'geography_detail',
-    ),
+    path('profiles/<geography_id>-<slug>/', cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view())),
 
     # embeds - handles the legacy static/iframe.html URL to generate the page on the fly
     #          so that settings can be injected
