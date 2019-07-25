@@ -43,10 +43,9 @@ class GeographyDetailView(BaseGeographyDetailView):
     def dispatch(self, *args, **kwargs):
         request = args[0]
         version = request.GET.get('geo_version', self.default_geo_version)
-        self.geo_id = self.kwargs.get('geography_id', None)
-
+        self.geo_level = self.kwargs.get('geo_level', None)
+        self.geo_code = self.kwargs.get('geo_code', None)
         try:
-            self.geo_level, self.geo_code = self.geo_id.split('-', 1)
             self.geo = geo_data.get_geography(self.geo_code, self.geo_level, version)
         except (ValueError, LocationNotFound):
             raise Http404
