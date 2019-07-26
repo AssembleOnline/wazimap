@@ -26,7 +26,7 @@
                 </div>
                 <div>
                     <span class="or">or</span>
-                    <a class="action-button" href="/profiles/country-ZA/">Browse South Africa</a>
+                    <a class="action-button" href="/profiles/country/ZA/south-africa">Browse South Africa</a>
                 </div>
             </div>
         </section>
@@ -182,7 +182,7 @@ if (allowMapDrag) {
                     });
                 });
                 layer.on('click', function() {
-                    window.location = '/profiles/province-' + code;
+                    window.location = '/profiles/province/' + code + '/' + name + '/';
                 });
             },
         });

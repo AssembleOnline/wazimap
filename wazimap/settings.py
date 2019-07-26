@@ -4,34 +4,34 @@ import sys
 import dj_database_url
 
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'true') == 'true'
-TESTING = 'test' in sys.argv[1:3]
+DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
+TESTING = "test" in sys.argv[1:3]
 
-ROOT_URLCONF = 'wazimap.urls'
-WSGI_APPLICATION = 'wazimap.wsgi.application'
+ROOT_URLCONF = "wazimap.urls"
+WSGI_APPLICATION = "wazimap.wsgi.application"
 
-ADMINS = (('Greg Kempe', 'greg@code4sa.org'),)
+ADMINS = (("Greg Kempe", "greg@code4sa.org"),)
 MANAGERS = ADMINS
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://wazimap:wazimap@localhost/wazimap')
-DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL),
-}
-DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASE_URL = os.environ.get(
+    "DATABASE_URL", "postgresql://wazimap:wazimap@localhost/wazimap"
+)
+DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 INSTALLED_APPS = [
-    'django.contrib.contenttypes',
-    'django.contrib.humanize',
-    'django.contrib.sites',
-    'django.contrib.staticfiles',
-    'sass_processor',
-    'wazimap.apps.WazimapConfig',
-    'census',
+    "django.contrib.contenttypes",
+    "django.contrib.humanize",
+    "django.contrib.sites",
+    "django.contrib.staticfiles",
+    "sass_processor",
+    "wazimap.apps.WazimapConfig",
+    "census",
 ]
 
-ALLOWED_HOSTS = ['*']
-TIME_ZONE = 'Africa/Johannesburg'
-LANGUAGE_CODE = 'en-za'
+ALLOWED_HOSTS = ["*"]
+TIME_ZONE = "Africa/Johannesburg"
+LANGUAGE_CODE = "en-za"
 SITE_ID = 1
 USE_I18N = False
 USE_L10N = True
@@ -40,119 +40,101 @@ USE_TZ = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
-    SECRET_KEY = '!%j-u4&(q8qu4@dq=ukth27+q!v-!h^jck14bf=spqht847$4q'
+    SECRET_KEY = "!%j-u4&(q8qu4@dq=ukth27+q!v-!h^jck14bf=spqht847$4q"
 else:
-    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 
 API_URL = None
 
 
 # Static files
-MEDIA_ROOT = ''
-MEDIA_URL = ''
+MEDIA_ROOT = ""
+MEDIA_URL = ""
 
-STATIC_ROOT = 'static'
-STATIC_URL = '/static/'
+STATIC_ROOT = "static"
+STATIC_URL = "/static/"
 
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'sass_processor.finders.CssFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "sass_processor.finders.CssFinder",
 )
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
-#STATICFILES_STORAGE = 'wazimap.pipeline.GzipManifestPipelineStorage'
+# STATICFILES_STORAGE = 'wazimap.pipeline.GzipManifestPipelineStorage'
 
 
 # Templates
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
-                'census.context_processors.api_url',
-                'wazimap.context_processors.wazimap_settings',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
+                "census.context_processors.api_url",
+                "wazimap.context_processors.wazimap_settings",
             ],
-            'debug': DEBUG,
+            "debug": DEBUG,
         },
-    },
+    }
 ]
 
 
 MIDDLEWARE_CLASSES = (
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'wazimap.middleware.RedirectMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "wazimap.middleware.RedirectMiddleware",
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 # CORS
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_METHODS = (
-    'GET',
-    'OPTIONS'
-)
+CORS_ALLOW_METHODS = ("GET", "OPTIONS")
 
 
 # Databases and caches
 if DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        }
-    }
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 else:
     CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': '/var/tmp/wazimap_cache',
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": "/var/tmp/wazimap_cache",
         }
     }
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s'
-        },
+    "version": 1,
+    "disable_existing_loggers": True,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s"
+        }
     },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        }
     },
-    'loggers': {
-        '': {
-            'handlers': ['console'],
-            'level': 'ERROR',
-        },
-        'census': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
-        },
-        'django': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
-        },
-        'django.template': {
-            'level': 'ERROR',
-        },
-        'wazimap': {
-            'level': 'DEBUG' if DEBUG else 'INFO',
-        },
-    }
+    "loggers": {
+        "": {"handlers": ["console"], "level": "ERROR"},
+        "census": {"level": "DEBUG" if DEBUG else "INFO"},
+        "django": {"level": "DEBUG" if DEBUG else "INFO"},
+        "django.template": {"level": "ERROR"},
+        "wazimap": {"level": "DEBUG" if DEBUG else "INFO"},
+    },
 }
 
 
@@ -163,35 +145,26 @@ STRIP_WWW = False
 
 WAZIMAP = {
     # The full name of the website
-    'name': 'Wazimap',
-
+    "name": "Wazimap",
     # The site's base URL, including scheme.
     # NOTE: if your site supports HTTPS, this MUST be
     # an 'https' url, otherwise embeds that are over HTTPS might
     # not load correctly.
-    'url': 'http://wazimap.example',
-
+    "url": "http://wazimap.example",
     # Twitter handle
-    'twitter': '@Wazimap',
-
+    "twitter": "@Wazimap",
     # Google Analytics tracking id (ua-xxxxx-x)
-    'ga_tracking_id': '',
-
+    "ga_tracking_id": "",
     # Two-letter country code for the country this site relates to
-    'country_code': '',
-
+    "country_code": "",
     # Google Geocoding API key, if you want to use more than the free limit
-    'google_geocode_api_key': '',
-
+    "google_geocode_api_key": "",
     # How many seconds should cacheable Wazimap pages be cached for?
-    'cache_secs': 60 * 60,
-
+    "cache_secs": 60 * 60,
     # How many seconds should Wazimap embed pages be cached for?
-    'embed_cache_secs': 24 * 60 * 60,
-
+    "embed_cache_secs": 24 * 60 * 60,
     # the dotted-path of the class to use for geo data helper routines
-    'geodata': 'wazimap.geo.GeoData',
-
+    "geodata": "wazimap.geo.GeoData",
     # Geography levels. This must be a dict similar to the following:
     #
     # {
@@ -202,16 +175,9 @@ WAZIMAP = {
     #   },
     #   ...
     # }
-    'levels': {
-        'country': {
-            'plural': 'countries',
-            'children': [],
-        }
-    },
-
+    "levels": {"country": {"plural": "countries", "children": []}},
     # ordered list of levels to compare a place to; should generally be 2-3 levels only.
-    'comparative_levels': [],
-
+    "comparative_levels": [],
     # Map from geometry names to local static files with geometry data. This is used
     # to both draw maps in webpages and for geolocation.
     # Wazimap uses Django's static files finder to find these files, so the
@@ -224,37 +190,28 @@ WAZIMAP = {
     # of topojson files.
     #
     # If a level isn't specified here, Wazimap will try to find a file under the key `''`.
-    'geometry_data': {
-        '': {
-            '': 'geo/all.geojson',
-        },
-    },
-
+    "geometry_data": {"": {"": "geo/all.geojson"}},
     # centre coordinates and zoom level defaults for maps. Centre must be a ``[lat, long]`` pair
     # and zoom is a zoom level (1-12).
     # If not set, the centre is determined from the geometry.
-    'map_centre': None,
-    'map_zoom': None,
-
+    "map_centre": None,
+    "map_zoom": None,
     # URL where embeds are hosted, default is the site URL
     # NOTE: if your site supports HTTPS, this MUST be
     # an 'https' url, otherwise embeds that are over HTTPS might
     # not load correctly.
-    'embed_url': None,
-
+    "embed_url": None,
     # Label to display if data is not available.
-    'na_label': 'N/A',
-
+    "na_label": "N/A",
     # Default geo version to use when loading geographies. If None,
     # uses the most recent version of the Geography. This is useful if your
     # geography table contains more recent geographies, but you don't want
     # to use the latest when the request doesn't specifify a version.
-    'default_geo_version': None,
-
+    "default_geo_version": None,
     # The geo version to use for legacy embeds that don't specify a geo version.
     # If None, uses the latest version.
     # If your users have already used embeds and you're introducing versioned
     # geographies, you probably want to set this to your earliest version, so
     # that embeds continue to show the original data.
-    'legacy_embed_geo_version': None,
+    "legacy_embed_geo_version": None,
 }
