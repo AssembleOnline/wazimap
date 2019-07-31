@@ -320,19 +320,19 @@ class GeographyDetailView(TemplateView):
 
     def parse_fragment(self,fragment):
         """Given a URL, return a (geoid,slug) tuple. slug may be None. GeoIDs are not tested for structure, but are simply the part of the URL before any '-' character, also allowing for the curiosity of Vermont legislative districts. (see https://github.com/censusreporter/censusreporter/issues/50)"""
-        parts = fragment.split('-',1)
+        parts = fragment.split('/',1)
         if len(parts) == 1:
             return (fragment,None)
 
         geoid,slug = parts
         if len(slug) == 1:
-            geoid = '{}-{}'.format(geoid,slug)
+            geoid = '{}/{}'.format(geoid,slug)
             slug = None
         else:
-            parts = slug.split('-')
+            parts = slug.split('/')
             if len(parts) > 1 and len(parts[0]) == 1:
-                geoid = '{}-{}'.format(geoid,parts[0])
-                slug = '-'.join(parts[1:])
+                geoid = '{}/{}'.format(geoid,parts[0])
+                slug = '/'.join(parts[1:])
 
         return (geoid,slug)
 
@@ -346,7 +346,7 @@ class GeographyDetailView(TemplateView):
                 try:
                     # if possible, redirect to slugged URL
                     slug = slugify(geo['properties']['display_name'])
-                    fragment = '{}-{}'.format(self.geo_id, slug)
+                    fragment = '{}/{}'.format(self.geo_id, slug)
                     return HttpResponseRedirect(
                         reverse('geography_detail', args=(fragment,)
                     ))
