@@ -326,13 +326,14 @@ class GeographyDetailView(TemplateView):
 
         geoid,slug = parts
         if len(slug) == 1:
-            geoid = '{}/{}'.format(geoid,slug)
+            geoid = '{}/{}/'.format(geoid,slug)
             slug = None
         else:
             parts = slug.split('/')
             if len(parts) > 1 and len(parts[0]) == 1:
                 geoid = '{}/{}'.format(geoid,parts[0])
                 slug = '/'.join(parts[1:])
+                slug = '{}/'.format(slug)
 
         return (geoid,slug)
 
