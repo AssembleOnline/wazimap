@@ -13,14 +13,14 @@ with open(path.join(here, 'VERSION')) as f:
 
 install_requires = [
     'numpy>=1.16.4',
-    'Django>=1.11.15,<1.12.0',
-    'SQLAlchemy>=0.9.4',
+    'Django>=2.2.3',
+    'SQLAlchemy>=1.3',
     'boto>=2.27.0',
-    'dj-database-url>=0.4.0',
-    'django-cors-headers>=1.1.0',
-    'django-compressor>=2.1.1',
-    'django-pipeline>=1.6.4',
-    'django-sass-processor==0.5.5',
+    'dj-database-url>=0.5.0',
+    'django-cors-headers>=3.0.2',
+    'django-compressor>=2.3',
+    'django-pipeline>=1.6.14',
+    'django-sass-processor==0.7.1',
     'ecdsa>=0.11',
     'futures>=3.0.4',
     'libsass>=0.13.1',
@@ -30,6 +30,24 @@ install_requires = [
     'unicodecsv>=0.9.4',
     'whitenoise>=1.0.6',
 ]
+
+numpy>=1.16.4
+Django>=2.2.3
+SQLAlchemy==1.3
+boto>=2.27.0
+dj-database-url>=0.5.0
+django-cors-headers>=3.0.2
+django-compressor>=2.3
+django-pipeline>=1.6.14
+django-sass-processor==0.7.1
+ecdsa>=0.11
+futures>=3.0.4
+libsass>=0.13.1
+paramiko>=1.12.3,<2
+psycopg2>=2.5.2
+requests>=1.2.0
+unicodecsv>=0.9.4
+whitenoise>=1.0.6
 
 setup(
     name='wazimap',
