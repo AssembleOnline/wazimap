@@ -85,6 +85,196 @@ class SimpleTable(object):
 
         DATA_TABLES[self.id] = self
 
+    def setup_columns(self):
+        """
+        Work out our columns by finding those that aren't geo columns.
+        """
+        self.columns = OrderedDict()
+        indent = 0
+        if self.total_column:
+            indent = 1
+
+        for col in (c.name for c in self.model.__table__.columns if c.name not in ['geo_code', 'geo_level', 'geo_version']):
+            self.columns[col] = {
+                'name': capitalize(col.replace('_', ' ')),
+                'indent': 0 if col == self.total_column else indent
+            }
+
+    def raw_data_for_geos(self, geos):
+        # initial values
+        data = {('%s-%s' % (geo.geo_level, geo.geo_code)): {
+                'estimate': {},
+                'error': {}}
+                for geo in geos}
+
+        session = get_session()
+        try:
+            geo_values = None
+            rows = session\
+                .query(self.model)\
+                .filter(or_(and_(
+                    self.model.geo_level == g.geo_level,
+                    self.model.geo_code == g.geo_code,
+                    self.model.geo_version == g.version)
+                    for g in geos))\
+                .all()
+
+            for row in rows:
+                geo_values = data['%s-%s' % (row.geo_level, row.geo_code)]
+
+                for col in self.columns.keys():
+                    geo_values['estimate'][col] = getattr(row, col)
+                    geo_values['error'][col] = 0
+
+        finally:
+            session.close()
+
+        return data
+
+    def get_stat_data(self, geo, fields=None, key_order=None, percent=True, total=None, recode=None):
+        """ Get a data dictionary for a place from this table.
+
+        This fetches the values for each column in this table and returns a data
+        dictionary for those values, with appropriate names and metadata.
+
+        :param geo: the geography
+        :param str or list fields: the columns to fetch stats for. By default, all columns except
+                                   geo-related and the total column (if any) are used.
+        :param str key_order: explicit ordering of (recoded) keys, or None for the default order.
+                              Default order is the order in +fields+ if given, otherwise
+                              it's the natural column order from the DB.
+        :param bool percent: should we calculate percentages, or just include raw values?
+        :param int total: the total value to use for percentages, name of a
+                          field, or None to use the sum of all retrieved fields (default)
+        :param dict recode: map from field names to strings to recode column names. Many fields
+                            can be recoded to the same thing, their values will be summed.
+
+        :return: (data-dictionary, total)
+        """
+
+        session = get_session()
+        try:
+            if fields is not None and not isinstance(fields, list):
+                fields = [fields]
+            if fields:
+                for f in fields:
+                    if f not in self.columns:
+                        raise ValueError("Invalid field/column '%s' for table '%s'. Valid columns are: %s" % (
+                            f, self.id, ', '.join(self.columns.keys())))
+            else:
+                fields = self.columns
+                # if self.total_column:
+                #     fields.pop(self.total_column)
+
+            recode = recode or {}
+            if recode:
+                # change lambda to dicts
+                if not isinstance(recode, dict):
+                    recode = {f: recode(f) for f in fields}
+
+            # is the total column valid?
+            if isinstance(total, str) and total not in self.columns:
+                raise ValueError("Total column '%s' isn't one of the columns for table '%s'. Valid columns are: %s" % (
+                    total, self.id, ', '.join(self.columns.keys())))
+
+            # table columns to fetch
+            cols = [self.model.__table__.columns[c] for c in fields]
+
+            if total is not None and isinstance(total, str) and total not in cols:
+                cols.append(total)
+
+            # do the query. If this returns no data, row is None
+            row = session\
+                .query(*cols)\
+                .filter(self.model.geo_level == geo.geo_level,
+                        self.model.geo_code == geo.geo_code,
+                        self.model.geo_version == geo.version)\
+                .first()
+
+            if row is None:
+                row = ZeroRow()
+
+            # what's our denominator?
+            if total is None:
+                # sum of all columns
+                total = sum(getattr(row, f) or 0 for f in fields)
+            elif isinstance(total, str):
+                total = getattr(row, total)
+
+            # Now build a data dictionary based on the columns in +row+.
+            # Multiple columns may be recoded into one, so we have to
+            # accumulate values as we go.
+            results = OrderedDict()
+
+            key_order = key_order or fields  # default key order is just the list of fields
+
+            for field in key_order:
+                val = getattr(row, field) or 0
+
+                # recode the key for this field, default is to keep it the same
+                key = recode.get(field, field)
+
+                # set the recoded field name, noting that the key may already
+                # exist if another column recoded to it
+                field_info = results.setdefault(key, {'name': recode.get(field, self.columns[field]['name'])})
+
+                if percent:
+                    # sum up existing values, if any
+                    val = val + field_info.get('numerators', {}).get('this', 0)
+                    field_info['values'] = {'this': p(val, total)}
+                    field_info['numerators'] = {'this': val}
+                else:
+                    # sum up existing values, if any
+                    val = val + field_info.get('values', {}).get('this', 0)
+                    field_info['values'] = {'this': val}
+
+            add_metadata(results, self)
+            return results, total
+        finally:
+            session.close()
+
+    def as_dict(self, columns=True):
+        return {
+            'title': self.description,
+            'universe': self.universe,
+            'denominator_column_id': self.total_column,
+            'columns': self.columns,
+            'table_id': self.id.upper(),
+            'stat_type': self.stat_type,
+        }
+
+    def _build_model(self, db_table):
+        # does it already exist?
+        model = get_model_for_db_table(db_table)
+        if model:
+            return model
+
+        columns = self._build_model_columns()
+
+        class Model(Base):
+            __table__ = Table(db_table, Base.metadata, *columns, autoload=True, extend_existing=True)
+
+        return Model
+
+    def _build_model_columns(self):
+        # We build this array in a particular order, with the geo-related fields first,
+        # to ensure that SQLAlchemy creates the underlying table with the compound primary
+        # key columns in the correct order:
+        #
+        #  geo_level, geo_code, geo_version, field, [field, field, ...]
+        #
+        # This means postgresql will use the first two elements of the compound primary
+        # key -- geo_level and geo_code -- when looking up values for a particular
+        # geograhy. This saves us from having to create a secondary index.
+        columns = []
+
+        # will form a compound primary key on the fields, and the geo id
+        columns.append(Column('geo_level', String(15), nullable=False, primary_key=True))
+        columns.append(Column('geo_code', String(10), nullable=False, primary_key=True))
+        columns.append(Column('geo_version', String(100), nullable=False, primary_key=True, server_default=''))
+
+        return columns
+
 
 FIELD_TABLE_FIELDS = set()
 FIELD_TABLES = {}

@@ -45,10 +45,10 @@ class GeographyDetailView(BaseGeographyDetailView):
     def dispatch(self, *args, **kwargs):
         request = args[0]
         version = request.GET.get('geo_version', self.default_geo_version)
-        self.geo_id = self.kwargs.get('geography_id', None)
+        self.geo_level = self.kwargs.get('geo_level', None)
+        self.geo_code = self.kwargs.get('geo_code', None)
 
         try:
-            self.geo_level, self.geo_code = self.geo_id.split('-', 1)
             self.geo = geo_data.get_geography(self.geo_code, self.geo_level, version)
         except (ValueError, LocationNotFound):
             raise Http404
@@ -57,7 +57,7 @@ class GeographyDetailView(BaseGeographyDetailView):
         if self.adjust_slugs and (kwargs.get('slug') or self.geo.slug):
             if kwargs['slug'] != self.geo.slug:
                 kwargs['slug'] = self.geo.slug
-                url = '/profiles/%s-%s-%s?%s' % (self.geo_level, self.geo_code, self.geo.slug, urllib.urlencode(request.GET))
+                url = '/profiles/%s/%s/%s?%s' % (self.geo_level, self.geo_code, self.geo.slug, urllib.urlencode(request.GET))
                 return redirect(url, permanent=True)
 
         # Skip the parent class's logic completely and go back to basics
@@ -298,8 +298,8 @@ class DataAPIView(View):
         data = {}
 
         for table in tables:
-            for geo_id, table_data in table.raw_data_for_geos(geos).iteritems():
-                data.setdefault(geo_id, {})[table.name.upper()] = table_data
+            for geo_id, table_data in table.raw_data_for_geos(geos).items():
+                data.setdefault(geo_id, {})[table.id.upper()] = table_data
 
         return data
 

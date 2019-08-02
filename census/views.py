@@ -1,8 +1,8 @@
 from __future__ import division
 from collections import OrderedDict, defaultdict
-from urllib import urlencode
-from urllib2 import unquote
-import cStringIO
+from urllib.parse import urlencode
+from urllib.request import urlopen
+from io import StringIO
 import gzip
 import re
 import requests
@@ -11,7 +11,7 @@ import json
 
 from django.conf import settings
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -226,8 +226,8 @@ class TableDetailView(TemplateView):
             'preview': {},
         }
 
-        for group, group_values in tables.iteritems():
-            preview_table = next(group_values.iteritems())[0]
+        for group, group_values in tables.items():
+            preview_table = next(group_values.items())[0]
             tabulation_data['related_tables']['preview'][preview_table] = self.get_table_data(preview_table)
             tabulation_data['related_tables']['preview'][preview_table]['table_type'] = self.TABLE_TYPE_TRANSLATE_DICT[preview_table.upper()[0]]
 
@@ -235,7 +235,7 @@ class TableDetailView(TemplateView):
 
     def get_topic_pages(self, table_topics):
         related_topic_pages = []
-        for key, values in TOPICS_MAP.iteritems():
+        for key, values in TOPICS_MAP.items():
             topics = values.get('topics', [])
             matches = set(topics).intersection(table_topics)
             if matches:
@@ -320,19 +320,20 @@ class GeographyDetailView(TemplateView):
 
     def parse_fragment(self,fragment):
         """Given a URL, return a (geoid,slug) tuple. slug may be None. GeoIDs are not tested for structure, but are simply the part of the URL before any '-' character, also allowing for the curiosity of Vermont legislative districts. (see https://github.com/censusreporter/censusreporter/issues/50)"""
-        parts = fragment.split('-',1)
+        parts = fragment.split('/',1)
         if len(parts) == 1:
             return (fragment,None)
 
         geoid,slug = parts
         if len(slug) == 1:
-            geoid = '{}-{}'.format(geoid,slug)
+            geoid = '{}/{}/'.format(geoid,slug)
             slug = None
         else:
-            parts = slug.split('-')
+            parts = slug.split('/')
             if len(parts) > 1 and len(parts[0]) == 1:
-                geoid = '{}-{}'.format(geoid,parts[0])
-                slug = '-'.join(parts[1:])
+                geoid = '{}/{}'.format(geoid,parts[0])
+                slug = '/'.join(parts[1:])
+                slug = '{}/'.format(slug)
 
         return (geoid,slug)
 
@@ -346,11 +347,11 @@ class GeographyDetailView(TemplateView):
                 try:
                     # if possible, redirect to slugged URL
                     slug = slugify(geo['properties']['display_name'])
-                    fragment = '{}-{}'.format(self.geo_id, slug)
+                    fragment = '{}/{}'.format(self.geo_id, slug)
                     return HttpResponseRedirect(
                         reverse('geography_detail', args=(fragment,)
                     ))
-                except Exception, e:
+                except Exception as e:
                     # if we have a strange situation where there's no
                     # display name attached to the geography, we should
                     # go ahead and display the profile page
@@ -403,7 +404,7 @@ class GeographyDetailView(TemplateView):
         s3_key.storage_class = 'REDUCED_REDUNDANCY'
 
         # create gzipped version of json in memory
-        memfile = cStringIO.StringIO()
+        memfile = StringIO()
         #memfile.write(data)
         with gzip.GzipFile(filename=s3_key.key, mode='wb', fileobj=memfile) as gzip_data:
             gzip_data.write(data)
@@ -421,7 +422,7 @@ class GeographyDetailView(TemplateView):
             s3_key = None
 
         if s3_key and s3_key.exists():
-            memfile = cStringIO.StringIO()
+            memfile = StringIO()
             s3_key.get_file(memfile)
             memfile.seek(0)
             compressed = gzip.GzipFile(fileobj=memfile)
@@ -648,7 +649,7 @@ class TableSearchJson(View):
             columns = None
 
         if topics:
-            topic_list = unquote(topics).split(',')
+            topic_list = urlopen(topics).split(',')
             for topic in topic_list:
                 tables = tables.filter(topics__contains = topic)
                 if columns:
