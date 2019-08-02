@@ -1,5 +1,4 @@
 from django.conf import settings
-
 # from django.contrib import admin
 from django.urls import reverse_lazy, path, re_path
 from django.http import HttpResponse
@@ -23,7 +22,6 @@ from wazimap.views import (
     TableDetailView,
 )
 
-
 # admin.autodiscover()
 handler500 = "census.views.server_error"
 
@@ -38,6 +36,11 @@ urlpatterns = [
     # e.g. /profiles/province-GT-gauteng/
     path(
         "profiles/<geo_level>/<geo_code>/<slug>",
+        cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()),
+        name="geography_detail",
+    ),
+    path(
+        "profiles/<geo_level>/<geo_code>/<slug>/", # FIXME: Trying to look how to put wildcards in normal path for '/'
         cache_page(STANDARD_CACHE_TIME)(GeographyDetailView.as_view()),
         name="geography_detail",
     ),

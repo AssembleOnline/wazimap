@@ -548,7 +548,7 @@ function Comparison(options) {
                 layer.bindLabel(label, {className: 'hovercard', direction: 'auto'});
                 layer.on('click', function() {
                     comparison.trackEvent('Map View', 'Click to visit geo detail page', feature.properties.name);
-                    window.location.href = '/profiles/' + feature.properties.level + '/' + feature.properties.code + '/' + feature.properties.name + '/';
+                    window.location.href = '/profiles/' + feature.properties.level + '/' + feature.properties.code + '/' + feature.properties.name;
                 });
             }
         });
